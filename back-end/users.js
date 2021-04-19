@@ -183,6 +183,7 @@ router.post('/login', async (req, res) => {
 // get logged in user
 router.get('/', validUser, async (req, res) => {
   try {
+    console.log("we in fools");
     res.send({
       user: req.user
     });
