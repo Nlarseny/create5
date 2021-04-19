@@ -1,42 +1,51 @@
 <template>
 <div class="form">
-<h2>Who is this for?</h2>
-<div class="suggestions" v-if="suggestions_people.length > 0">
-  <button v-for="sp in suggestions_people" :key="sp.id" @click="selectProject(sp)">{{sp.name}}
-  </button>
-</div>
+  <div v-if="user">
+  <h2>Who is this for?</h2>
+  <div class="suggestions" v-if="suggestions_people.length > 0">
+    <button v-for="sp in suggestions_people" :key="sp.id" @click="selectProject(sp)">{{sp.name}}
+    </button>
+  </div>
 
-<div class="products">
-    <div class="product" v-for="item in suggestions" :key="item.id">
-      <div class="info">
-        <p>Title:</p>
-        <br>
-        <p>{{item.title}}</p>
-        <hr>
-        <p>Content:</p>
-        <br>
-        <p>{{item.content}}</p>
-        <hr>
-        <p>Date:</p>
-        <br>
-        <p>{{item.month}}/{{item.day}}/{{item.year}}</p>
-        <hr>
-        <p>Time:</p>
-        <br>
-        <p>{{item.hour}}:{{item.min}}</p>
+  <div class="products">
+      <div class="product" v-for="item in suggestions" :key="item.id">
+        <div class="info">
+          <p>Title:</p>
+          <br>
+          <p>{{item.title}}</p>
+          <hr>
+          <p>Content:</p>
+          <br>
+          <p>{{item.content}}</p>
+          <hr>
+          <p>Date:</p>
+          <br>
+          <p>{{item.month}}/{{item.day}}/{{item.year}}</p>
+          <hr>
+          <p>Time:</p>
+          <br>
+          <p>{{item.hour}}:{{item.min}}</p>
+        </div>
       </div>
     </div>
   </div>
 
+  <div v-else>
+    <Login/>
+  </div>
+
 </div>
-
-
 </template>
+
 
 <script>
 import axios from 'axios';
+import Login from '/components/Login.vue';
 export default {
   name: 'Home',
+  components: {
+    Login
+  },
   data() {
     return {
      items: [],
@@ -62,6 +71,9 @@ export default {
   },
 
   computed: {
+    user() {
+      return this.$root.$data.user;
+    },
     suggestions() {
       this.getItems();
       let items = this.items.filter(item => item.title.toLowerCase().startsWith(this.findTitle.toLowerCase()));
@@ -74,7 +86,13 @@ export default {
 
   },
 
-  created() {
+  async created() {
+    try {
+      let response = await axios.get('/api/users');
+      this.$root.$data.user = response.data.user;
+    } catch (error) {
+      this.$root.$data.user = null;
+    }
     this.getItems();
     this.getPeople();
   },

@@ -25,6 +25,14 @@
           <p>Editor</p>
         </div>
       </router-link>
+
+      <router-link to="/">
+        <div @click="logout">
+          <img src="/logout.gif" height="120">
+        </div>
+      </router-link>
+
+
     </div>
 
   </div>
@@ -36,6 +44,31 @@
   </div>
 </div>
 </template>
+
+<script>
+import axios from 'axios';
+export default {
+  name: 'MyPhotos',
+  data() {
+    return {}
+  },
+  computed: {
+    user() {
+      return this.$root.$data.user;
+    },
+  },
+  methods: {
+    async logout() {
+      try {
+        await axios.delete("/api/users");
+        this.$root.$data.user = null;
+      } catch (error) {
+        this.$root.$data.user = null;
+      }
+    },
+  }
+}
+</script>
 
 <style>
 html {
