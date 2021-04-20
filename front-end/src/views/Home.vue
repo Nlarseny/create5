@@ -77,10 +77,12 @@ export default {
     suggestions() {
       this.getItems();
       let items = this.items.filter(item => item.title.toLowerCase().startsWith(this.findTitle.toLowerCase()));
+      this.getItems();
       return items.sort((a, b) => a.title > b.title);
     },
     suggestions_people() {
       let people = this.people.filter(person => person.name.toLowerCase().startsWith(this.findTitle.toLowerCase()));
+      this.getPeople();
       return people.sort((a, b) => a.name > b.name);
     }
 
@@ -88,6 +90,8 @@ export default {
 
   async created() {
     try {
+    this.items = []; //added
+    this.people = []; //added
       let response = await axios.get('/api/users');
       this.$root.$data.user = response.data.user;
     } catch (error) {
@@ -101,14 +105,15 @@ export default {
     selectProject(project) {
       this.project = project;
       this.project_id = project._id;
-      console.log(this.project);
+      //console.log(this.project);
     },
     async getItems() {
     try {
+
       let response = await axios.get('/api/projects/' + this.project._id + '/items');
       //console.log(response.data);
       this.items = response.data;
-      console.log(this.items);
+      //console.log(this.items);
       return true;
     } catch (error) {
       console.log(error);

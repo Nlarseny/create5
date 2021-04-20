@@ -192,6 +192,7 @@ export default {
   },
   async getPeople() {
   try {
+  this.people = []; //added
     let response = await axios.get("/api/projects");
     this.people = response.data;
     return true;
@@ -203,6 +204,7 @@ export default {
 
   async getItems() {
   try {
+  this.items = []; //added
     let response = await axios.get('/api/projects/' + this.project._id + '/items');
     //console.log(response.data);
     this.items = response.data;
