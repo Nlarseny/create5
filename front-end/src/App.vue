@@ -35,7 +35,8 @@
     <router-view />
   </div>
   <div class="footer">
-    <router-link to="/admin">Admin</router-link>
+    <p>Hours spent: 6 </p>
+    <a href="https://github.com/Nlarseny/create5" target="_blank" class="text-dark">Github Link</a>
   </div>
 </div>
 </template>
@@ -58,7 +59,7 @@ export default {
         await axios.delete("/api/users");
         this.$root.$data.user = null;
         //this.$root.$data = null; // added
-        
+
       } catch (error) {
         this.$root.$data.user = null;
         //this.$root.$data = null; //added
