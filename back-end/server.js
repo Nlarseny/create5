@@ -8,6 +8,7 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
+
 const mongoose = require('mongoose');
 
 // connect to the database
@@ -30,10 +31,19 @@ app.use(cookieSession({
   }
 }));
 
-// Create a scheme for projects
-const projectSchema = new mongoose.Schema({
+//added 1
+const users = require("./users.js");
+const User = users.model;
+const validUser = users.valid;
+
+// added 2
+const projectSchema = new mongoose.Schema({ // aka the person of interest
   name: String,
-  info: String
+  info: String,
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  },
 });
 
 // Create a model for projects
@@ -43,8 +53,8 @@ const Project = mongoose.model('Project', projectSchema);
 // Create a scheme for items in the museum: a title and a path to an image.
 const itemSchema = new mongoose.Schema({
 	project: {
-	type: mongoose.Schema.ObjectId,
-        ref: 'Project'
+	   type: mongoose.Schema.ObjectId,
+     ref: 'Project'
 	},
   title: String,
   content: String,
@@ -60,12 +70,13 @@ const Item = mongoose.model('Item', itemSchema);
 
 
 // Create a project
-app.post('/api/projects', async (req, res) => {
+app.post('/api/projects', validUser, async (req, res) => {
   const project = new Project({
+    user: req.user, // added
     name: req.body.name,
-    info: req.body.info
+    info: req.body.info,
   });
-	console.log(req.body.name);
+	console.log(req.user);
   try {
     await project.save();
     res.send(project);
@@ -76,10 +87,14 @@ app.post('/api/projects', async (req, res) => {
 });
 
 // Get a list of all projects
-app.get('/api/projects', async (req, res) => {
+app.get('/api/projects', validUser, async (req, res) => {
   try {
-    let projects = await Project.find();
-    res.send(projects);
+    let projects = await Project.find({
+      user: req.user
+    }).sort({
+      created: -1
+    }).populate('user');
+    return res.send(projects);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
@@ -88,7 +103,7 @@ app.get('/api/projects', async (req, res) => {
 
 //add updating and deleting later
 // Delete route
-app.delete('/api/projects/:id', async (req, res) => {
+app.delete('/api/projects/:id', validUser, async (req, res) => {
   try {
     await Project.deleteOne({
       _id: req.params.id
@@ -101,7 +116,7 @@ app.delete('/api/projects/:id', async (req, res) => {
 });
 
 // edit route
-app.put('/api/projects/:id', async (req, res) => {
+app.put('/api/projects/:id', validUser, async (req, res) => {
   try {
     let project = await Project.findOne({
       _id: req.params.id
@@ -126,18 +141,20 @@ app.put('/api/projects/:id', async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 
 // create a new item containing the note info
-app.post('/api/projects/:projectID/items', async (req, res) => {
+app.post('/api/projects/:projectID/items', validUser, async (req, res) => {
 
   try {
 	  console.log(req.params);
-	let project = await Project.findOne({_id: req.params.projectID});
+	let project = await Project.findOne({
+    _id: req.params.projectID
+  }).populate('user');
         if (!project) {
             res.send(404);
             return;
         }
 	let item = new Item({
         project: project,
-
+        user: req.requser, //added
         title: req.body.title,
         content: req.body.content,
         month: req.body.month,
@@ -145,7 +162,7 @@ app.post('/api/projects/:projectID/items', async (req, res) => {
         day: req.body.day,
         min: req.body.min,
         hour: req.body.hour,
-  	});
+  	}).populate('user');
 
     await item.save();
     res.send(item);
@@ -156,15 +173,17 @@ app.post('/api/projects/:projectID/items', async (req, res) => {
 });
 
 // Get a list of all of the items in the museum.
-app.get('/api/projects/:projectID/items', async (req, res) => {
+app.get('/api/projects/:projectID/items', validUser, async (req, res) => {
   try {
-	let project = await Project.findOne({_id: req.params.projectID});
+	let project = await Project.findOne({_id: req.params.projectID}).populate('user');
+  console.log(project);
 	if (!project) {
             res.send(404);
             return;
         }
 
-    let items = await Item.find({project:project});
+    let items = await Item.find({project:project}).populate('user');
+    console.log(items);
     res.send(items);
   } catch (error) {
     console.log(error);
@@ -173,7 +192,7 @@ app.get('/api/projects/:projectID/items', async (req, res) => {
 });
 
 // Delete route
-app.delete('/api/projects/:projectID/items/:itemID', async (req, res) => {
+app.delete('/api/projects/:projectID/items/:itemID', validUser, async (req, res) => {
   try {
 	let item = await Item.findOne({_id:req.params.itemID, project: req.params.projectID});
         if (!item) {
@@ -189,7 +208,7 @@ app.delete('/api/projects/:projectID/items/:itemID', async (req, res) => {
 });
 
 // edit route
-app.put('/api/projects/:projectID/items/:itemID', async (req, res) => {
+app.put('/api/projects/:projectID/items/:itemID', validUser, async (req, res) => {
   try {
 	let item = await Item.findOne({_id:req.params.itemID, project: req.params.projectID});
         if (!item) {
@@ -215,7 +234,7 @@ app.put('/api/projects/:projectID/items/:itemID', async (req, res) => {
 });
 
 // import the users module and setup its API path
-const users = require("./users.js");
+//const users = require("./users.js"); commented out 1
 app.use("/api/users", users.routes);
 
 app.listen(3003, () => console.log('Server listening on port 3003!'));

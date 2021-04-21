@@ -75,45 +75,55 @@ export default {
       return this.$root.$data.user;
     },
     suggestions() {
-      this.getItems();
+      //this.getItems();
       let items = this.items.filter(item => item.title.toLowerCase().startsWith(this.findTitle.toLowerCase()));
-      this.getItems();
+      //this.getItems();
+      //console.log(items);
       return items.sort((a, b) => a.title > b.title);
     },
     suggestions_people() {
-      let people = this.people.filter(person => person.name.toLowerCase().startsWith(this.findTitle.toLowerCase()));
       this.getPeople();
-      return people.sort((a, b) => a.name > b.name);
+      //let people = this.people.filter(person => person.name.toLowerCase().startsWith(this.findTitle.toLowerCase()));
+      //console.log(people);
+      //this.getPeople();
+      //return people.sort((a, b) => a.name > b.name);
+      return this.people;
     }
 
   },
-
   async created() {
     try {
-    this.items = []; //added
-    this.people = []; //added
+    //this.items = []; //added
+    //this.people = []; //added
+
+      console.log("hmmm");
       let response = await axios.get('/api/users');
       this.$root.$data.user = response.data.user;
+      //this.getPeople();
+      //this.getItems();
+
     } catch (error) {
       this.$root.$data.user = null;
     }
-    this.getItems();
+  },
+  mounted() {
     this.getPeople();
+    this.getItems();
   },
 
   methods: {
     selectProject(project) {
       this.project = project;
       this.project_id = project._id;
+      this.getItems();
       //console.log(this.project);
     },
     async getItems() {
     try {
-
       let response = await axios.get('/api/projects/' + this.project._id + '/items');
       //console.log(response.data);
       this.items = response.data;
-      //console.log(this.items);
+      console.log(response);
       return true;
     } catch (error) {
       console.log(error);
@@ -121,6 +131,7 @@ export default {
     },
     async getPeople() {
     try {
+      //this.people = null; //added
       let response = await axios.get("/api/projects");
       this.people = response.data;
       return true;

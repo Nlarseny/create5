@@ -77,6 +77,7 @@ export default {
           password: this.passwordLogin,
         });
         this.$root.$data.user = response.data.user;
+        //this.$forceUpdate();
       } catch (error) {
         this.errorLogin = "Error: " + error.response.data.message;
         this.$root.$data.user = null;

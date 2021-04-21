@@ -132,8 +132,9 @@ export default {
   },
   computed: {
     suggestions() {
-      this.getItems();
+      //this.getItems();
       let items = this.items.filter(item => item.title.toLowerCase().startsWith(this.findTitle.toLowerCase()));
+      this.getItems();
       return items.sort((a, b) => a.title > b.title);
     },
     suggestions_people() {

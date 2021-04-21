@@ -13,12 +13,7 @@
     </div>
 
     <div id="side">
-    <router-link to="/">
-      <div class="menu-item browse">
-        <img src="/login.jpg" height="120">
-        <p>Login</p>
-      </div>
-    </router-link>
+
       <router-link to="/admin">
         <div class="menu-item browse">
           <img src="/notepad_plain_paper.png" height="120">
@@ -63,6 +58,7 @@ export default {
         await axios.delete("/api/users");
         this.$root.$data.user = null;
         //this.$root.$data = null; // added
+        
       } catch (error) {
         this.$root.$data.user = null;
         //this.$root.$data = null; //added
